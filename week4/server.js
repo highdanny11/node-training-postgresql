@@ -6,7 +6,7 @@ const examStringNotEmpty = (val) => {
   if (typeof val !== 'string') {
     return false
   }
-  if (val.trim().length === 0 || val.length === '') {
+  if (val.trim().length === 0 || val === '') {
     return false;
   }
   return true

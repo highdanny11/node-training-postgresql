@@ -44,7 +44,7 @@ app.use((err, req, res, next) => {
   req.log.error(err)
   if (err.status) {
     res.status(err.status).json({
-      status: 'failed',
+      status: err.statusMessage,
       message: err.message
     })
     return

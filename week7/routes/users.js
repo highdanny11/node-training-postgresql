@@ -9,13 +9,16 @@ const auth = require('../middlewares/auth')({
   userRepository: dataSource.getRepository('User'),
   logger
 })
+const { register, login, updateName, updatePassword } = require('../validations/auth')
+const validate = require('../middlewares/validate')
+const checkUpdatePassword = require('../middlewares/checkUpdatePassword')
 
-router.post('/signup', users.postSignup)
-router.post('/login', users.postLogin)
+router.post('/signup', validate(register), users.postSignup)
+router.post('/login', validate(login), users.postLogin)
 router.get('/profile', auth, users.getProfile)
 router.get('/credit-package', auth, users.getCreditPackage)
-router.put('/profile', auth, users.putProfile)
-router.put('/password', auth, users.putPassword)
+router.put('/profile', auth, validate(updateName), users.putProfile)
+router.put('/password', auth, validate(updatePassword), checkUpdatePassword, users.putPassword)
 router.get('/courses', auth, users.getCourseBooking)
 
 module.exports = router

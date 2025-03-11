@@ -5,6 +5,8 @@ const config = require('../config/index')
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('CreditPackage')
 const creditPackage = require('../controllers/creditPackage')
+const { createCreditPackage } = require('../validations/creditPackage')
+const validate = require('../middlewares/validate')
 const auth = require('../middlewares/auth')({
   secret: config.get('secret').jwtSecret,
   userRepository: dataSource.getRepository('User'),
@@ -13,7 +15,7 @@ const auth = require('../middlewares/auth')({
 
 router.get('/', creditPackage.getAll)
 
-router.post('/', creditPackage.post)
+router.post('/', validate(createCreditPackage), creditPackage.post)
 
 router.post('/:creditPackageId', auth, creditPackage.postUserBuy)
 

@@ -1,3 +1,5 @@
 module.exports.userService = require('./users')
 module.exports.skillService = require('./skill')
 module.exports.creditPackageService = require('./creditPackage')
+module.exports.courseService = require('./courses')
+module.exports.coachService = require('./coaches')

@@ -3,18 +3,6 @@ const logger = require('../utils/logger')('CreditPackageController')
 const catchAsync = require('../utils/catchAsync')
 const { creditPackageService } = require('../services');
 
-function isUndefined(value) {
-  return value === undefined
-}
-
-function isNotValidSting(value) {
-  return typeof value !== 'string' || value.trim().length === 0 || value === ''
-}
-
-function isNotValidInteger(value) {
-  return typeof value !== 'number' || value < 0 || value % 1 !== 0
-}
-
 const getAll = catchAsync(async (req, res, next) => {
   const creditPackages = await creditPackageService.getCreditPackage()
   res.status(200).json({

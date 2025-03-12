@@ -11,8 +11,10 @@ const auth = require('../middlewares/auth')({
   logger
 })
 const isCoach = require('../middlewares/isCoach')
+const { addCoachCourse } = require('../validations/admin')
+const validate = require('../middlewares/validate')
 
-router.post('/coaches/courses', auth, isCoach, admin.postCourse)
+router.post('/coaches/courses', auth, isCoach, validate(addCoachCourse), admin.postCourse)
 
 router.get('/coaches/revenue', auth, isCoach, admin.getCoachRevenue)
 

@@ -3,6 +3,7 @@ const utc = require('dayjs/plugin/utc')
 
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('AdminController')
+const { adminService } = require('../services')
 
 dayjs.extend(utc)
 const monthMap = {
@@ -20,80 +21,41 @@ const monthMap = {
   december: 12
 }
 
-function isUndefined (value) {
+const catchAsync = require('../utils/catchAsync')
+
+function isUndefined(value) {
   return value === undefined
 }
 
-function isNotValidSting (value) {
+function isNotValidSting(value) {
   return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
-function isNotValidInteger (value) {
+function isNotValidInteger(value) {
   return typeof value !== 'number' || value < 0 || value % 1 !== 0
 }
 
-async function postCourse (req, res, next) {
-  try {
-    const { id } = req.user
-    const {
-      skill_id: skillId, name, description, start_at: startAt, end_at: endAt,
-      max_participants: maxParticipants, meeting_url: meetingUrl
-    } = req.body
-    if (isUndefined(skillId) || isNotValidSting(skillId) ||
-    isUndefined(name) || isNotValidSting(name) ||
-    isUndefined(description) || isNotValidSting(description) ||
-    isUndefined(startAt) || isNotValidSting(startAt) ||
-    isUndefined(endAt) || isNotValidSting(endAt) ||
-    isUndefined(maxParticipants) || isNotValidInteger(maxParticipants) ||
-    isUndefined(meetingUrl) || isNotValidSting(meetingUrl) || !meetingUrl.startsWith('https')) {
-      logger.warn('欄位未填寫正確')
-      res.status(400).json({
-        status: 'failed',
-        message: '欄位未填寫正確'
-      })
-      return
-    }
-    const userRepository = dataSource.getRepository('User')
-    const existingUser = await userRepository.findOne({
-      select: ['id', 'name', 'role'],
-      where: { id }
-    })
-    if (!existingUser) {
-      logger.warn('使用者不存在')
-      res.status(400).json({
-        status: 'failed',
-        message: '使用者不存在'
-      })
-      return
-    }
-    const courseRepo = dataSource.getRepository('Course')
-    const newCourse = courseRepo.create({
-      user_id: id,
-      skill_id: skillId,
-      name,
-      description,
-      start_at: startAt,
-      end_at: endAt,
-      max_participants: maxParticipants,
-      meeting_url: meetingUrl
-    })
-    const savedCourse = await courseRepo.save(newCourse)
-    const course = await courseRepo.findOne({
-      where: { id: savedCourse.id }
-    })
-    res.status(201).json({
-      status: 'success',
-      data: {
-        course
-      }
-    })
-  } catch (error) {
-    logger.error(error)
-    next(error)
-  }
-}
+const postCourse = catchAsync(async (req, res) => {
+  const { id } = req.user
+  const {
+    skill_id: skillId, name, description, start_at: startAt, end_at: endAt,
+    max_participants: maxParticipants, meeting_url: meetingUrl
+  } = req.body
 
-async function getCoachRevenue (req, res, next) {
+  const course = await adminService.createCoachCourse({
+    id, skillId, name, description, startAt, endAt, maxParticipants, meetingUrl
+  })
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      course
+    }
+  })
+})
+
+
+async function getCoachRevenue(req, res, next) {
   try {
     const { id } = req.user
     const { month } = req.query
@@ -164,7 +126,7 @@ async function getCoachRevenue (req, res, next) {
   }
 }
 
-async function getCoachCourses (req, res, next) {
+async function getCoachCourses(req, res, next) {
   try {
     const { id } = req.user
     const courses = await dataSource.getRepository('Course').find({
@@ -220,7 +182,7 @@ async function getCoachCourses (req, res, next) {
   }
 }
 
-async function getCoachCourseDetail (req, res, next) {
+async function getCoachCourseDetail(req, res, next) {
   try {
     const { id } = req.user
     const course = await dataSource.getRepository('Course').findOne({
@@ -262,7 +224,7 @@ async function getCoachCourseDetail (req, res, next) {
   }
 }
 
-async function putCoachCourseDetail (req, res, next) {
+async function putCoachCourseDetail(req, res, next) {
   try {
     const { id } = req.user
     const { courseId } = req.params
@@ -331,7 +293,7 @@ async function putCoachCourseDetail (req, res, next) {
   }
 }
 
-async function postCoach (req, res, next) {
+async function postCoach(req, res, next) {
   try {
     const { userId } = req.params
     const { experience_years: experienceYears, description, profile_image_url: profileImageUrl = null } = req.body
@@ -410,7 +372,7 @@ async function postCoach (req, res, next) {
   }
 }
 
-async function putCoachProfile (req, res, next) {
+async function putCoachProfile(req, res, next) {
   try {
     const { id } = req.user
     const {
@@ -492,7 +454,7 @@ async function putCoachProfile (req, res, next) {
   }
 }
 
-async function getCoachProfile (req, res, next) {
+async function getCoachProfile(req, res, next) {
   try {
     const { id } = req.user
     const coachRepo = dataSource.getRepository('Coach')

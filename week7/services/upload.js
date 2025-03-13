@@ -11,7 +11,8 @@ firebaseAdmin.initializeApp({
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
 const ALLOWED_FILE_TYPES = {
   'image/jpeg': true,
-  'image/png': true
+  'image/png': true,
+  'image/jpg': true
 }
 const bucket = firebaseAdmin.storage().bucket()
 

@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt')
 const ApiError = require('../utils/ApiError')
 const { IsNull, In } = require('typeorm')
 
+const saltRounds = process.env.SALT_ROUNDS || 10; 
+
 const checkRepeatEmial = async (email) => {
   const userRepository = dataSource.getRepository('User')
   const existingUser = await userRepository.findOne({
@@ -14,9 +16,10 @@ const checkRepeatEmial = async (email) => {
   return userRepository
 }
 
+
 const createUser = async (user = { name: '', email: '', password: '' }, repository = null) => {
   const userRepository = repository || dataSource.getRepository('User')
-  const salt = await bcrypt.genSalt(10)
+  const salt = await bcrypt.genSalt(saltRounds)
   const hashPassword = await bcrypt.hash(user.password, salt)
   const newUser = userRepository.create({
     ...user,
